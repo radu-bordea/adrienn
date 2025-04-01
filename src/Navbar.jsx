@@ -14,8 +14,8 @@ const Navbar = () => {
 
   return (
     <nav className="shadow-md p-4">
-      <div className="container mx-auto flex justify-between items-center">
-        <NavLink to="/" className="text-xl font-bold text-gray-500">
+      <div className="container flex justify-between items-center">
+        <NavLink to="/" className="mx-12 text-xl font-bold text-gray-500">
           Logo
         </NavLink>
 
@@ -46,12 +46,6 @@ const Navbar = () => {
             className="block text-gray-700 hover:text-blue-500 px-3 py-2 text-center"
           >
             About
-          </NavLink>
-          <NavLink
-            to="/services"
-            className="block text-gray-700 hover:text-blue-500 px-3 py-2 text-center"
-          >
-            Services
           </NavLink>
           <NavLink
             to="/contact"
