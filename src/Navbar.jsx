@@ -15,8 +15,8 @@ const Navbar = () => {
   return (
     <nav className="shadow-md p-4">
       <div className="container flex justify-between items-center">
-        <NavLink to="/" className="mx-12 text-xl font-bold text-gray-500">
-          Logo
+        <NavLink to="/" className="mx-12 text-xl font-bold text-amber-400">
+          Shop with Adrienn
         </NavLink>
 
         {/* Burger Button */}
@@ -37,26 +37,26 @@ const Navbar = () => {
         >
           <NavLink
             to="/"
-            className="block text-gray-700 hover:text-blue-500 px-3 py-2 text-center"
+            className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
           >
             Home
           </NavLink>
           <NavLink
             to="/about"
-            className="block text-gray-700 hover:text-blue-500 px-3 py-2 text-center"
+            className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
           >
             About
           </NavLink>
           <NavLink
             to="/contact"
-            className="block text-gray-700 hover:text-blue-500 px-3 py-2 text-center"
+            className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
           >
             Contact
           </NavLink>
 
           {/* Signed In User - Show User Profile & Logout */}
           <SignedIn>
-            <button
+            {/* <button
               onClick={() => {
                 signOut(() => {
                   window.location.href = "/"; // Redirect to home after sign-out
@@ -65,7 +65,7 @@ const Navbar = () => {
               className="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
             >
               Logout
-            </button>
+            </button> */}
             <UserButton />
           </SignedIn>
 

@@ -26,7 +26,7 @@ function App() {
     <Router>
       <div
         className={`min-h-screen ${
-          darkMode ? "bg-gray-900 text-white" : "bg-white text-amber-700"
+          darkMode ? "bg-gray-900 text-white" : "bg-white text-amber-400"
         }`}
       >
         <button
