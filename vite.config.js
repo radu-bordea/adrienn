@@ -7,10 +7,10 @@ export default defineConfig({
   plugins: [tailwindcss(), react()],
   server: {
     proxy: {
-      "api/": {
+      "/api": {
         target: "https://adrienn-backend.onrender.com/",
         changeOrigin: true,
-        secure: true,
+        secure: true, // Set this to false if you face SSL issues during local development
       },
     },
   },
