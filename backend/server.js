@@ -6,7 +6,9 @@ const productRoutes = require("./routes/products");
 // express app
 const app = express();
 
-// middleware
+// middleware - looks if there is body to the request
+app.use(express.json())
+
 app.use((req, res, next) => {
   console.log(req.path, req.method);
   next();
