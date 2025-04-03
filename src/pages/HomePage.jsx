@@ -48,7 +48,7 @@ const HomePage = () => {
             <img
               src={product.imageUrl}
               alt={product.name}
-              className="w-1/2 h-96 md:w-full md:h-192 object-cover rounded-md"
+              className="w-full h-96 md:w-full md:h-192 object-cover rounded-md"
             />
             <h2 className="text-lg font-semibold mt-2">{product.name}</h2>
             <p className="text-gray-500">{product.description}</p>
