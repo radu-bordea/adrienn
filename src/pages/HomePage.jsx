@@ -9,7 +9,7 @@ const HomePage = () => {
 
     const fetchProducts = async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/products"); // Adjust API routes as needed
+        const response = await fetch("/api/products"); // Adjust API routes as needed
         const data = await response.json();
         setProducts(data);
       } catch (error) {
