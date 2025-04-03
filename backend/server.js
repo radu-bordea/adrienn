@@ -10,7 +10,7 @@ const app = express();
 // Allow requests from the frontend
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://adrienn-frontend.onrender.com"],
+    origin: "https://adrienn-frontend.onrender.com/",
   })
 );
 

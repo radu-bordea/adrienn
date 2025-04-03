@@ -9,7 +9,9 @@ const HomePage = () => {
 
     const fetchProducts = async () => {
       try {
-        const response = await fetch("/api/products"); // Adjust API routes as needed
+        const response = await fetch(
+          "https://adrienn-backend.onrender.com/api/products"
+        ); // Adjust API routes as needed
         const data = await response.json();
         setProducts(data);
       } catch (error) {
