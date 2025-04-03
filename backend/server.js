@@ -8,7 +8,11 @@ const productRoutes = require("./routes/products");
 const app = express();
 
 // Allow requests from the frontend
-app.use(cors({ origin: "http://localhost:5173" }));
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://adrienn-frontend.onrender.com"],
+  })
+);
 
 // middleware - looks if there is body to the request
 app.use(express.json());
