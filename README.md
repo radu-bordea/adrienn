@@ -11,3 +11,4 @@
 - npm install nodemon
 - npm i dotenv
 - npm install mongoose
+- npm install cors
