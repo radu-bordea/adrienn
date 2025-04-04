@@ -38,23 +38,25 @@ const Navbar = () => {
           <NavLink
             to="/"
             className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
+            onClick={() => setIsOpen(false)}
           >
             Home
           </NavLink>
 
-          {/* Show Admin link if the user is signed in */}
           <SignedIn>
             <NavLink
               to="/admin"
               className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
+              onClick={() => setIsOpen(false)}
             >
               Admin
             </NavLink>
           </SignedIn>
-          
+
           <NavLink
             to="/about"
             className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
+            onClick={() => setIsOpen(false)}
           >
             About
           </NavLink>
@@ -62,29 +64,21 @@ const Navbar = () => {
           <NavLink
             to="/contact"
             className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
+            onClick={() => setIsOpen(false)}
           >
             Contact
           </NavLink>
 
-          {/* Signed In User - Show User Profile & Logout */}
           <SignedIn>
-            {/* <button
-              onClick={() => {
-                signOut(() => {
-                  window.location.href = "/"; // Redirect to home after sign-out
-                });
-              }}
-              className="text-white bg-gradient-to-br from-pink-500 to-orange-400 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-pink-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-            >
-              Logout
-            </button> */}
             <UserButton />
           </SignedIn>
 
-          {/* Signed Out - Show Login Button */}
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+              <button
+                className="text-white bg-gradient-to-br from-green-400 to-blue-600 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                onClick={() => setIsOpen(false)}
+              >
                 Sign In
               </button>
             </SignInButton>
