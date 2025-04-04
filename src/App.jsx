@@ -6,6 +6,9 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
 import "./App.css";
+import ProductPage from "./pages/ProductPage";
+import AdminPage from "./pages/AdminPage";
+import CreateProductPage from "./pages/CreateProductPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(
@@ -39,6 +42,9 @@ function App() {
         <div className="p-4">
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/admin/create-product" element={<CreateProductPage/>}/>
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />

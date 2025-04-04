@@ -41,12 +41,24 @@ const Navbar = () => {
           >
             Home
           </NavLink>
+
+          {/* Show Admin link if the user is signed in */}
+          <SignedIn>
+            <NavLink
+              to="/admin"
+              className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
+            >
+              Admin
+            </NavLink>
+          </SignedIn>
+          
           <NavLink
             to="/about"
             className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
           >
             About
           </NavLink>
+
           <NavLink
             to="/contact"
             className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
