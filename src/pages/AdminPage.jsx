@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser, SignedIn, SignedOut } from "@clerk/clerk-react";
+import { useUser, SignedIn } from "@clerk/clerk-react";
 
 const AdminPage = () => {
   const navigate = useNavigate();
-  const { user, isLoaded } = useUser(); // Get logged-in user and isLoaded state
+  const { user, isLoaded } = useUser();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Ensure user data is fully loaded
   useEffect(() => {
-    if (!isLoaded) return; // Wait for the user data to load
+    if (!isLoaded) return;
     if (!user) {
       alert("You must be logged in to access this page.");
-      navigate("/"); // Redirect to home if not logged in
+      navigate("/");
       return;
     }
 
-    // Fetch products
     const fetchProducts = async () => {
       try {
         const response = await fetch(
@@ -35,9 +33,8 @@ const AdminPage = () => {
     };
 
     fetchProducts();
-  }, [user, navigate, isLoaded]); // Add isLoaded in dependency array to ensure it only runs when the user is loaded
+  }, [user, navigate, isLoaded]);
 
-  // Handle Product Deletion
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?"))
       return;
@@ -59,12 +56,21 @@ const AdminPage = () => {
     }
   };
 
-  // Redirect to Create Product Page
   const handleCreate = () => {
-    navigate("/admin/create-product"); // Route to product creation page
+    navigate("/admin/create-product");
   };
 
-  // Loading and error handling
+  const handleEdit = (id) => {
+    navigate(`/admin/edit-product/${id}`);
+  };
+
+  // Helper function to limit description to 5 words
+  const limitDescription = (text) => {
+    const words = text.split(" ");
+    if (words.length <= 5) return text;
+    return words.slice(0, 5).join(" ") + "...";
+  };
+
   if (loading) return <p>Loading products...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -72,7 +78,6 @@ const AdminPage = () => {
     <div className="container mx-auto mt-10 p-4">
       <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
 
-      {/* Only show the create button if the user is logged in */}
       <SignedIn>
         <button
           onClick={handleCreate}
@@ -82,28 +87,57 @@ const AdminPage = () => {
         </button>
       </SignedIn>
 
-      {/* Product List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <ul className="w-full border rounded-lg shadow divide-y space-y-2">
         {products.map((product) => (
-          <div key={product._id} className="border p-4 rounded-lg shadow-md">
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              className="w-full h-48 object-cover rounded-md"
-            />
-            <h2 className="text-lg font-semibold mt-2">{product.name}</h2>
-            <p className="text-gray-500">{product.price}</p>
+          <li key={product._id} className="flex flex-col md:flex-row md:items-center p-4 gap-2 md:gap-0">
+            {/* Column 1: Image */}
+            <div className="w-24 flex-shrink-0 px-4">
+              <img
+                src={product.imageUrl}
+                alt={product.name}
+                className="w-12 h-12 object-cover rounded"
+              />
+            </div>
+
+            {/* Column 2: Basic info */}
+            <div className="flex flex-col justify-center px-4 min-w-[200px] text-left">
+              <h2 className="font-semibold">{product.name}</h2>
+              <p className="text-sm text-gray-500">
+                Category: {product.category}
+              </p>
+              <p className="text-sm text-gray-500">Price: ${product.price}</p>
+              <p className="text-sm text-gray-500">Stock: {product.stock}</p>
+            </div>
+
+            {/* Column 3: Description */}
+            <div className="flex-1 px-4 text-sm text-gray-500 md:whitespace-normal md:overflow-visible md:text-ellipsis text-left">
+              <span className="md:hidden">{limitDescription(product.description)}</span>
+              <span className="hidden md:block">{product.description}</span>
+            </div>
+
+            {/* Column 4: Edit and Delete Button */}
             <SignedIn>
-              <button
-                onClick={() => handleDelete(product._id)}
-                className="mt-2 px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
-              >
-                Delete
-              </button>
+              <div className="pl-4 flex flex-col md:flex-row md:items-center gap-2">
+                {/* Edit Button */}
+                <button
+                  onClick={() => handleEdit(product._id)}
+                  className="px-4 py-1 w-1/3 bg-yellow-500 text-white rounded hover:bg-yellow-600 md:w-auto"
+                >
+                  Edit
+                </button>
+
+                {/* Delete Button */}
+                <button
+                  onClick={() => handleDelete(product._id)}
+                  className="px-4 py-1 w-1/3 bg-red-500 text-white rounded hover:bg-red-600 md:w-auto"
+                >
+                  Delete
+                </button>
+              </div>
             </SignedIn>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 };

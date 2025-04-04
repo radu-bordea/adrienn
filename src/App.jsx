@@ -9,6 +9,7 @@ import "./App.css";
 import ProductPage from "./pages/ProductPage";
 import AdminPage from "./pages/AdminPage";
 import CreateProductPage from "./pages/CreateProductPage";
+import EditProductPage from "./pages/EditProductPage";
 
 function App() {
   const [darkMode, setDarkMode] = useState(
@@ -29,7 +30,7 @@ function App() {
     <Router>
       <div
         className={`min-h-screen ${
-          darkMode ? "bg-gray-900 text-white" : "bg-white text-amber-400"
+          darkMode ? "bg-gray-900 text-white" : "bg-white text-gray-400"
         }`}
       >
         <button
@@ -44,7 +45,14 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/admin/create-product" element={<CreateProductPage/>}/>
+            <Route
+              path="/admin/create-product"
+              element={<CreateProductPage />}
+            />
+            <Route
+              path="/admin/edit-product/:id"
+              element={<EditProductPage />}
+            />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />

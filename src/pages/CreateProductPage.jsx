@@ -66,7 +66,7 @@ const CreateProductPage = () => {
           onChange={handleChange}
           placeholder="Product Name"
           required
-          className="border rounded w-full p-2"
+          className="border rounded w-full p-2 text-gray-500"
         />
         <input
           type="number"
