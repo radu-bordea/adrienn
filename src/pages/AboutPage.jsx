@@ -35,6 +35,7 @@ const AboutPage = () => {
         id mi.
       </p>
     </div>
+    
   );
 };
 
