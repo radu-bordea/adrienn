@@ -3,6 +3,7 @@
 - cd adrienn
 - npm install tailwindcss @tailwindcss/vite
 - npm install react-router-dom
+- npm install @reduxjs/toolkit react-redux
 
 
 # backend
