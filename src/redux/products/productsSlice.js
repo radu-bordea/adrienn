@@ -1,81 +1,148 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-// Async thunk to fetch products from backend API
+// Fetch all products
 export const fetchProducts = createAsyncThunk(
-  "products/fetchProducts", // Action type
+  "products/fetchProducts",
   async (_, thunkAPI) => {
     try {
-      // Call the API to get all products
       const res = await fetch(
         "https://adrienn-backend.onrender.com/api/products"
       );
       const data = await res.json();
-      return data; // This gets passed to .fulfilled
+      return data;
     } catch (error) {
-      // Handle error by sending a custom error message to .rejected
       return thunkAPI.rejectWithValue("Failed to fetch products");
     }
   }
 );
 
-// Async thunk to delete products from backend API
-export const deleteProduct = createAsyncThunk(
-  "products/deleteProduct", // Action type
+// Fetch a single product by ID
+export const fetchProductById = createAsyncThunk(
+  "products/fetchProductById",
   async (id, thunkAPI) => {
     try {
-      const response = await fetch(
+      const res = await fetch(
+        `https://adrienn-backend.onrender.com/api/products/${id}`
+      );
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue("Failed to fetch product");
+    }
+  }
+);
+
+// Update product
+export const updateProduct = createAsyncThunk(
+  "products/updateProduct",
+  async ({ id, updatedData }, thunkAPI) => {
+    try {
+      const res = await fetch(
+        `https://adrienn-backend.onrender.com/api/products/${id}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedData),
+        }
+      );
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue("Failed to update product");
+    }
+  }
+);
+
+// Delete a product
+export const deleteProduct = createAsyncThunk(
+  "products/deleteProduct",
+  async (id, thunkAPI) => {
+    try {
+      const res = await fetch(
         `https://adrienn-backend.onrender.com/api/products/${id}`,
         {
           method: "DELETE",
         }
       );
-      if (!response.ok) throw new Error("Failed to delete product");
+      if (!res.ok) throw new Error("Failed to delete product");
       return id;
     } catch (error) {
-      // Handle error by sending a custom error message to .rejected
       return thunkAPI.rejectWithValue(error.message);
     }
   }
 );
 
-// Creating the products slice
+// Products slice
 const productsSlice = createSlice({
   name: "products",
   initialState: {
-    items: [], // Array to store fetched products
-    loading: false, // To show loading state during fetch
-    error: null, // To capture any error during fetch
+    items: [],
+    selectedProduct: null,
+    loading: false,
+    error: null,
   },
-  reducers: {}, // No standard reducers for now — just using extraReducers
+  reducers: {},
   extraReducers: (builder) => {
-    // When fetchProducts is triggered and pending
     builder
+      // Fetch all
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      // When fetchProducts is successful
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload;
       })
-      // When fetchProducts fails
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      // When deleteProduct is successful
-      .addCase(deleteProduct.fulfilled, (state, action) => {
-        state.items = state.items.filter(
-          (product) => product._id !== action.payload
-        );
+
+      // Fetch one
+      .addCase(fetchProductById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.selectedProduct = null;
       })
-      // When deleteProduct fails
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedProduct = action.payload;
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Update
+      .addCase(updateProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedProduct = action.payload;
+
+        // Update the item in the list if it exists
+        const index = state.items.findIndex(
+          (p) => p._id === action.payload._id
+        );
+        if (index !== -1) {
+          state.items[index] = action.payload;
+        }
+      })
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Delete
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.items = state.items.filter((p) => p._id !== action.payload);
+      })
       .addCase(deleteProduct.rejected, (state, action) => {
         state.error = action.payload;
       });
   },
 });
 
-// Exporting the reducer to use in the store
 export default productsSlice.reducer;

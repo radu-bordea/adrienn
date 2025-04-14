@@ -1,13 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useUser, SignedIn } from "@clerk/clerk-react";
+import { useUser } from "@clerk/clerk-react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchProductById,
+  updateProduct,
+} from "../redux/products/productsSlice";
 
 const EditProductPage = () => {
-  const { id } = useParams(); // Get product ID from URL parameters
+  // Get product ID from URL params
+  const { id } = useParams();
   const navigate = useNavigate();
   const { user, isLoaded } = useUser();
 
-  const [product, setProduct] = useState({
+  const dispatch = useDispatch();
+
+  // Access selected product state from Redux
+  const { selectedProduct, loading, error } = useSelector(
+    (state) => state.products
+  );
+
+  // Local state for form input values
+  const [formData, setFormData] = useState({
     name: "",
     category: "",
     price: "",
@@ -15,67 +29,56 @@ const EditProductPage = () => {
     description: "",
     imageUrl: "",
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
+  // Fetch product data by ID when component mounts
   useEffect(() => {
     if (!isLoaded) return;
+
+    // Redirect if user is not logged in
     if (!user) {
       alert("You must be logged in to access this page.");
       navigate("/");
       return;
     }
 
-    // Fetch the product details to edit
-    const fetchProduct = async () => {
-      try {
-        const response = await fetch(
-          `https://adrienn-backend.onrender.com/api/products/${id}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch product");
-        const data = await response.json();
-        setProduct(data); // Set the product data for the form
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+    dispatch(fetchProductById(id));
+  }, [id, user, isLoaded, dispatch, navigate]);
 
-    fetchProduct();
-  }, [id, isLoaded, user, navigate]);
+  // Populate form with fetched product data
+  useEffect(() => {
+    if (selectedProduct) {
+      setFormData(selectedProduct);
+    }
+  }, [selectedProduct]);
 
+  // Handle input changes and update local form state
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setProduct((prevProduct) => ({
-      ...prevProduct,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
     }));
   };
 
+  // Handle form submission to update the product
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const response = await fetch(
-        `https://adrienn-backend.onrender.com/api/products/${id}`,
-        {
-          method: "PATCH", // Change to PATCH
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(product),
-        }
-      );
-      if (!response.ok) throw new Error("Failed to update product");
+    // Dispatch update action
+    const resultAction = await dispatch(
+      updateProduct({ id, updatedData: formData })
+    );
 
+    // Check if update was successful
+    if (updateProduct.fulfilled.match(resultAction)) {
       alert("Product updated successfully!");
-      navigate("/admin"); // Redirect back to the admin dashboard
-    } catch (error) {
-      alert(error.message);
+      navigate("/admin");
+    } else {
+      alert(resultAction.payload || "Update failed");
     }
   };
 
+  // Display loading or error messages
   if (loading) return <p>Loading product...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
@@ -83,61 +86,66 @@ const EditProductPage = () => {
     <div className="container mx-auto mt-10 p-4">
       <h1 className="text-3xl font-bold mb-6">Edit Product</h1>
 
-      {/* Edit Product Form */}
+      {/* Product Edit Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Product Name */}
         <div>
           <label className="block text-lg font-semibold">Product Name</label>
           <input
             type="text"
             name="name"
-            value={product.name}
+            value={formData.name}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md"
             required
           />
         </div>
 
+        {/* Category */}
         <div>
           <label className="block text-lg font-semibold">Category</label>
           <input
             type="text"
             name="category"
-            value={product.category}
+            value={formData.category}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md"
             required
           />
         </div>
 
+        {/* Price */}
         <div>
           <label className="block text-lg font-semibold">Price</label>
           <input
             type="number"
             name="price"
-            value={product.price}
+            value={formData.price}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md"
             required
           />
         </div>
 
+        {/* Stock */}
         <div>
           <label className="block text-lg font-semibold">Stock</label>
           <input
             type="number"
             name="stock"
-            value={product.stock}
+            value={formData.stock}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md"
             required
           />
         </div>
 
+        {/* Description */}
         <div>
           <label className="block text-lg font-semibold">Description</label>
           <textarea
             name="description"
-            value={product.description}
+            value={formData.description}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md"
             rows="4"
@@ -145,18 +153,20 @@ const EditProductPage = () => {
           ></textarea>
         </div>
 
+        {/* Image URL */}
         <div>
           <label className="block text-lg font-semibold">Image URL</label>
           <input
             type="text"
             name="imageUrl"
-            value={product.imageUrl}
+            value={formData.imageUrl}
             onChange={handleChange}
             className="w-full px-4 py-2 border rounded-md"
             required
           />
         </div>
 
+        {/* Submit Button */}
         <div className="flex items-center justify-between mt-6">
           <button
             type="submit"
