@@ -1,15 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+
+const API_URL = "https://adrienn-backend.onrender.com/api/products";
 
 // Fetch all products
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, thunkAPI) => {
     try {
-      const res = await fetch(
-        "https://adrienn-backend.onrender.com/api/products"
-      );
-      const data = await res.json();
-      return data;
+      const response = await axios.get(API_URL);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue("Failed to fetch products");
     }
@@ -21,33 +21,37 @@ export const fetchProductById = createAsyncThunk(
   "products/fetchProductById",
   async (id, thunkAPI) => {
     try {
-      const res = await fetch(
-        `https://adrienn-backend.onrender.com/api/products/${id}`
-      );
-      const data = await res.json();
-      return data;
+      const response = await axios.get(`${API_URL}/${id}`);
+      return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue("Failed to fetch product");
     }
   }
 );
 
-// Update product
+// Create a new product
+export const createProduct = createAsyncThunk(
+  "products/createProduct",
+  async (productData, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(API_URL, productData);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to create product"
+      );
+    }
+  }
+);
+
+// Update a product
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
   async ({ id, updatedData }, thunkAPI) => {
     try {
-      const res = await fetch(
-        `https://adrienn-backend.onrender.com/api/products/${id}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedData),
-        }
-      );
-      const data = await res.json();
-      return data;
-    } catch (err) {
+      const response = await axios.patch(`${API_URL}/${id}`, updatedData);
+      return response.data;
+    } catch (error) {
       return thunkAPI.rejectWithValue("Failed to update product");
     }
   }
@@ -58,16 +62,10 @@ export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
   async (id, thunkAPI) => {
     try {
-      const res = await fetch(
-        `https://adrienn-backend.onrender.com/api/products/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-      if (!res.ok) throw new Error("Failed to delete product");
+      await axios.delete(`${API_URL}/${id}`);
       return id;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue("Failed to delete product");
     }
   }
 );
@@ -113,6 +111,20 @@ const productsSlice = createSlice({
         state.error = action.payload;
       })
 
+      // Create
+      .addCase(createProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items.push(action.payload);
+      })
+      .addCase(createProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
       // Update
       .addCase(updateProduct.pending, (state) => {
         state.loading = true;
@@ -121,8 +133,6 @@ const productsSlice = createSlice({
       .addCase(updateProduct.fulfilled, (state, action) => {
         state.loading = false;
         state.selectedProduct = action.payload;
-
-        // Update the item in the list if it exists
         const index = state.items.findIndex(
           (p) => p._id === action.payload._id
         );

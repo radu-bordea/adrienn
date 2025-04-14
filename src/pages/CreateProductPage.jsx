@@ -1,8 +1,13 @@
 import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { createProduct } from "../redux/products/productsSlice";
 
 const CreateProductPage = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { loading, error } = useSelector((state) => state.products);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -13,44 +18,30 @@ const CreateProductPage = () => {
     imageUrl: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
+  // Handle input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
 
-    // Convert stock and price to numbers
+    // Format data before sending
     const formattedData = {
       ...formData,
-      price: Number(formData.price), // Ensure it's a number
-      stock: Number(formData.stock), // Ensure it's a number
+      price: Number(formData.price),
+      stock: Number(formData.stock),
     };
 
-    try {
-      const response = await fetch(
-        "https://adrienn-backend.onrender.com/api/products/",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formattedData), // Send converted data
-        }
-      );
+    const resultAction = await dispatch(createProduct(formattedData));
 
-      if (!response.ok) throw new Error("Failed to create product");
-
-      const newProduct = await response.json();
-      console.log("Product Created:", newProduct);
-      navigate("/admin"); // Redirect after success
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    // Check if product was created successfully
+    if (createProduct.fulfilled.match(resultAction)) {
+      alert("Product created successfully!");
+      navigate("/admin");
+    } else {
+      alert(resultAction.payload || "Failed to create product");
     }
   };
 
@@ -58,6 +49,8 @@ const CreateProductPage = () => {
     <div className="p-6 max-w-lg mx-auto">
       <h1 className="text-2xl font-bold mb-4">Create New Product</h1>
       {error && <p className="text-red-500">{error}</p>}
+
+      {/* Product Creation Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
