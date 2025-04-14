@@ -18,6 +18,26 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+// Async thunk to delete products from backend API
+export const deleteProduct = createAsyncThunk(
+  "products/deleteProduct", // Action type
+  async (id, thunkAPI) => {
+    try {
+      const response = await fetch(
+        `https://adrienn-backend.onrender.com/api/products/${id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (!response.ok) throw new Error("Failed to delete product");
+      return id;
+    } catch (error) {
+      // Handle error by sending a custom error message to .rejected
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 // Creating the products slice
 const productsSlice = createSlice({
   name: "products",
@@ -42,6 +62,16 @@ const productsSlice = createSlice({
       // When fetchProducts fails
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      // When deleteProduct is successful
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.items = state.items.filter(
+          (product) => product._id !== action.payload
+        );
+      })
+      // When deleteProduct fails
+      .addCase(deleteProduct.rejected, (state, action) => {
         state.error = action.payload;
       });
   },
