@@ -41,7 +41,7 @@ const ProductPage = () => {
         <img
           src={product.imageUrl}
           alt={product.name}
-          className="w-full h-192 object-cover rounded-md"
+          className="w-full h-192 object-contain rounded-md"
         />
       </div>
 

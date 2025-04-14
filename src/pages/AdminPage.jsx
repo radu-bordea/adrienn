@@ -79,7 +79,7 @@ const AdminPage = () => {
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className="w-12 h-12 object-cover rounded"
+                className="w-12 h-12 object-contain rounded"
               />
             </div>
 

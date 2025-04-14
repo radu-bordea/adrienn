@@ -36,7 +36,7 @@ const HomePage = () => {
               <img
                 src={product.imageUrl}
                 alt={product.name}
-                className="w-full h-96 md:w-full md:h-192 object-cover rounded-md"
+                className="w-full h-96 md:w-full md:h-192 object-contain rounded-md"
               />
 
               {/* Product Name */}
