@@ -15,3 +15,4 @@
 - npm i dotenv
 - npm install mongoose
 - npm install cors
+- npm install cloudinary
