@@ -124,20 +124,32 @@ export const deleteProduct = createAsyncThunk(
       // Delete the product from the backend
       await axios.delete(`${API_URL}/${id}`);
 
-      // Now delete the image from Cloudinary
+      // Now delete the image from Cloudinary if it exists
       if (product.imagePublicId) {
-        await axios.post(`${CLOUDINARY_API_URL}image/destroy`, {
+        const cloudinaryRes = await axios.post(`${CLOUDINARY_API_URL}image/destroy`, {
           public_id: product.imagePublicId,
           invalidate: true,
         });
+
+        // Check if the Cloudinary deletion was successful
+        if (cloudinaryRes.status !== 200) {
+          console.error("Failed to delete image from Cloudinary:", cloudinaryRes.data);
+          throw new Error("Cloudinary image deletion failed");
+        }
       }
 
-      return id; // Return the product id to delete it from the state
+      // Return the product id to delete it from the state
+      return id;
     } catch (error) {
-      return thunkAPI.rejectWithValue("Failed to delete product");
+      console.error("Error during product deletion:", error.message || error);
+      // Provide a more specific error message
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Failed to delete product"
+      );
     }
   }
 );
+
 
 // Products slice
 const productsSlice = createSlice({
@@ -215,10 +227,17 @@ const productsSlice = createSlice({
       })
 
       // Delete
+      .addCase(deleteProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        // Remove product from the list after successful deletion
         state.items = state.items.filter((p) => p._id !== action.payload);
       })
       .addCase(deleteProduct.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   },

@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
 const productRoutes = require("./routes/products");
+const cloudinary = require("cloudinary").v2;
 
 // express app
 const app = express();
