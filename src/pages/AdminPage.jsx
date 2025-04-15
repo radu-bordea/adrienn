@@ -9,14 +9,12 @@ const AdminPage = () => {
   const navigate = useNavigate();
   const { user, isLoaded } = useUser();
 
-  // Access product-related state from Redux store
   const {
     items: products,
     loading,
     error,
   } = useSelector((state) => state.products);
 
-  // Fetch products on page load (only if user is authenticated)
   useEffect(() => {
     if (!isLoaded) return;
     if (!user) {
@@ -28,7 +26,6 @@ const AdminPage = () => {
     dispatch(fetchProducts());
   }, [dispatch, user, isLoaded, navigate]);
 
-  // Handle product deletion with confirmation
   const handleDelete = async (id) => {
     const confirm = window.confirm(
       "Are you sure you want to delete this product?"
@@ -37,54 +34,49 @@ const AdminPage = () => {
     dispatch(deleteProduct(id));
   };
 
-  // Navigate to the Create Product form
   const handleCreate = () => navigate("/admin/create-product");
 
-  // Navigate to the Edit Product form with the selected product ID
   const handleEdit = (id) => navigate(`/admin/edit-product/${id}`);
 
-  // Truncate long descriptions to show only first few words
   const limitDescription = (text) => {
+    if (!text) return "";
     const words = text.split(" ");
     return words.length <= 5 ? text : words.slice(0, 5).join(" ") + "...";
   };
 
-  // Display loading or error states
-  if (loading) return <p>Loading products...</p>;
+  if (loading) return <div className="spinner">Loading...</div>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="container mx-auto mt-10 p-4">
       <h1 className="text-3xl font-bold mb-4">Admin Dashboard</h1>
 
-      {/* Button to create a new product (only shown when signed in) */}
       <SignedIn>
         <button
           onClick={handleCreate}
-          className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 mb-6"
+          className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition mb-6"
         >
           + Create New Product
         </button>
       </SignedIn>
 
-      {/* Product List */}
-      <ul className="w-full border rounded-lg shadow divide-y space-y-2">
+      <ul className="w-full border rounded-lg shadow divide-y">
         {products.map((product) => (
           <li
             key={product._id}
-            className="flex flex-col md:flex-row md:items-center p-4 gap-2 md:gap-0"
+            className="flex flex-col md:flex-row md:items-center p-4 gap-4"
           >
             {/* Product Image */}
-            <div className="w-24 flex-shrink-0 px-4">
+            <div className="w-24 flex-shrink-0">
               <img
-                src={product.imageUrl}
+                src={product.imageUrl || "https://via.placeholder.com/100"}
                 alt={product.name}
-                className="w-12 h-12 object-contain rounded"
+                className="w-16 h-16 object-contain rounded"
               />
             </div>
 
             {/* Product Info */}
-            <div className="flex flex-col justify-center px-4 min-w-[200px] text-left">
+            <div className="flex flex-col justify-center min-w-[200px] text-left">
               <h2 className="font-semibold">{product.name}</h2>
               <p className="text-sm text-gray-500">
                 Category: {product.category}
@@ -93,30 +85,26 @@ const AdminPage = () => {
               <p className="text-sm text-gray-500">Stock: {product.stock}</p>
             </div>
 
-            {/* Product Description */}
-            <div className="flex-1 px-4 text-sm text-gray-500 md:whitespace-normal text-left">
-              {/* Shorter description on mobile */}
-              <span className="md:hidden">
+            {/* Description */}
+            <div className="flex-1 text-sm text-gray-600 text-left">
+              <span className="md:hidden block">
                 {limitDescription(product.description)}
               </span>
               <span className="hidden md:block">{product.description}</span>
             </div>
 
-            {/* Admin Controls (only visible if signed in) */}
+            {/* Admin Controls */}
             <SignedIn>
-              <div className="pl-4 flex flex-col md:flex-row md:items-center gap-2">
-                {/* Edit Button */}
+              <div className="flex flex-col md:flex-row gap-2 pl-4">
                 <button
                   onClick={() => handleEdit(product._id)}
-                  className="px-4 py-1 w-1/3 bg-yellow-500 text-white rounded hover:bg-yellow-600 md:w-auto"
+                  className="px-4 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition"
                 >
                   Edit
                 </button>
-
-                {/* Delete Button */}
                 <button
                   onClick={() => handleDelete(product._id)}
-                  className="px-4 py-1 w-1/3 bg-red-500 text-white rounded hover:bg-red-600 md:w-auto"
+                  className="px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
                 >
                   Delete
                 </button>

@@ -7,20 +7,19 @@ import {
   updateProduct,
 } from "../redux/products/productsSlice";
 
+const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
 const EditProductPage = () => {
-  // Get product ID from URL params
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, isLoaded } = useUser();
-
   const dispatch = useDispatch();
 
-  // Access selected product state from Redux
   const { selectedProduct, loading, error } = useSelector(
     (state) => state.products
   );
 
-  // Local state for form input values
   const [formData, setFormData] = useState({
     name: "",
     category: "",
@@ -28,30 +27,36 @@ const EditProductPage = () => {
     stock: "",
     description: "",
     imageUrl: "",
+    imagePublicId: "",
   });
 
-  // Fetch product data by ID when component mounts
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+
   useEffect(() => {
     if (!isLoaded) return;
-
-    // Redirect if user is not logged in
     if (!user) {
-      alert("You must be logged in to access this page.");
+      alert("You must be logged in.");
       navigate("/");
       return;
     }
-
     dispatch(fetchProductById(id));
   }, [id, user, isLoaded, dispatch, navigate]);
 
-  // Populate form with fetched product data
   useEffect(() => {
     if (selectedProduct) {
-      setFormData(selectedProduct);
+      setFormData({
+        name: selectedProduct.name || "",
+        category: selectedProduct.category || "",
+        price: selectedProduct.price || "",
+        stock: selectedProduct.stock || "",
+        description: selectedProduct.description || "",
+        imageUrl: selectedProduct.imageUrl || "",
+        imagePublicId: selectedProduct.imagePublicId || "",
+      });
     }
   }, [selectedProduct]);
 
-  // Handle input changes and update local form state
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -60,87 +65,96 @@ const EditProductPage = () => {
     }));
   };
 
-  // Handle form submission to update the product
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Dispatch update action
-    const resultAction = await dispatch(
-      updateProduct({ id, updatedData: formData })
-    );
-
-    // Check if update was successful
-    if (updateProduct.fulfilled.match(resultAction)) {
-      alert("Product updated successfully!");
-      navigate("/admin");
-    } else {
-      alert(resultAction.payload || "Update failed");
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
     }
   };
 
-  // Display loading or error messages
+  const uploadImageToCloudinary = async () => {
+    if (!imageFile) return {};
+
+    const form = new FormData();
+    form.append("file", imageFile);
+    form.append("upload_preset", UPLOAD_PRESET);
+    form.append("folder", "adrienn");
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: form,
+      }
+    );
+
+    const data = await res.json();
+    if (!res.ok) throw new Error("Image upload failed");
+
+    return {
+      imageUrl: data.secure_url.replace(
+        "/upload/",
+        "/upload/w_800,c_fit,f_auto/"
+      ),
+      imagePublicId: data.public_id,
+    };
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      let imageData = {};
+      if (imageFile) {
+        imageData = await uploadImageToCloudinary();
+      }
+
+      const updatedProduct = {
+        ...formData,
+        ...imageData,
+        price: Number(formData.price),
+        stock: Number(formData.stock),
+      };
+
+      const resultAction = await dispatch(
+        updateProduct({ id, updatedData: updatedProduct })
+      );
+
+      if (updateProduct.fulfilled.match(resultAction)) {
+        alert("Product updated!");
+        navigate("/admin");
+      } else {
+        alert(resultAction.payload || "Update failed");
+      }
+    } catch (err) {
+      alert("Something went wrong: " + err.message);
+    }
+  };
+
   if (loading) return <p>Loading product...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
 
   return (
     <div className="container mx-auto mt-10 p-4">
       <h1 className="text-3xl font-bold mb-6">Edit Product</h1>
-
-      {/* Product Edit Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Product Name */}
-        <div>
-          <label className="block text-lg font-semibold">Product Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
+        {["name", "category", "price", "stock"].map((field) => (
+          <div key={field}>
+            <label className="block text-lg font-semibold capitalize">
+              {field}
+            </label>
+            <input
+              type={field === "price" || field === "stock" ? "number" : "text"}
+              name={field}
+              value={formData[field]}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-md"
+              required
+            />
+          </div>
+        ))}
 
-        {/* Category */}
-        <div>
-          <label className="block text-lg font-semibold">Category</label>
-          <input
-            type="text"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-
-        {/* Price */}
-        <div>
-          <label className="block text-lg font-semibold">Price</label>
-          <input
-            type="number"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-
-        {/* Stock */}
-        <div>
-          <label className="block text-lg font-semibold">Stock</label>
-          <input
-            type="number"
-            name="stock"
-            value={formData.stock}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-
-        {/* Description */}
         <div>
           <label className="block text-lg font-semibold">Description</label>
           <textarea
@@ -153,28 +167,28 @@ const EditProductPage = () => {
           ></textarea>
         </div>
 
-        {/* Image URL */}
         <div>
-          <label className="block text-lg font-semibold">Image URL</label>
-          <input
-            type="text"
-            name="imageUrl"
-            value={formData.imageUrl}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
+          <label className="block text-lg font-semibold">Image</label>
+          <input type="file" accept="image/*" onChange={handleImageChange} />
+          {previewUrl ? (
+            <img src={previewUrl} alt="Preview" className="max-h-60 mt-2" />
+          ) : (
+            formData.imageUrl && (
+              <img
+                src={formData.imageUrl}
+                alt="Current"
+                className="max-h-60 mt-2"
+              />
+            )
+          )}
         </div>
 
-        {/* Submit Button */}
-        <div className="flex items-center justify-between mt-6">
-          <button
-            type="submit"
-            className="px-6 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-          >
-            Save Changes
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+        >
+          Save Changes
+        </button>
       </form>
     </div>
   );

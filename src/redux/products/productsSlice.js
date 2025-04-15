@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
+// Cloudinary API URL for image management
+const CLOUDINARY_API_URL = "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/";
+
+// Backend API URL for product CRUD operations
 const API_URL = "https://adrienn-backend.onrender.com/api/products";
 
 // Fetch all products
@@ -34,7 +38,32 @@ export const createProduct = createAsyncThunk(
   "products/createProduct",
   async (productData, { rejectWithValue }) => {
     try {
-      const response = await axios.post(API_URL, productData);
+      // If image exists, upload to Cloudinary first
+      let imageUpdate = {};
+      if (productData.imageFile) {
+        const form = new FormData();
+        form.append("file", productData.imageFile);
+        form.append("upload_preset", "YOUR_UPLOAD_PRESET");
+
+        const cloudinaryRes = await axios.post(
+          `${CLOUDINARY_API_URL}image/upload`,
+          form
+        );
+
+        if (cloudinaryRes.status !== 200) {
+          throw new Error("Cloudinary upload failed");
+        }
+
+        imageUpdate = {
+          imageUrl: cloudinaryRes.data.secure_url,
+          imagePublicId: cloudinaryRes.data.public_id,
+        };
+      }
+
+      const response = await axios.post(API_URL, {
+        ...productData,
+        ...imageUpdate, // Add image data if available
+      });
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -49,7 +78,33 @@ export const updateProduct = createAsyncThunk(
   "products/updateProduct",
   async ({ id, updatedData }, thunkAPI) => {
     try {
-      const response = await axios.patch(`${API_URL}/${id}`, updatedData);
+      // If new image exists, upload to Cloudinary first
+      let imageUpdate = {};
+      if (updatedData.imageFile) {
+        const form = new FormData();
+        form.append("file", updatedData.imageFile);
+        form.append("upload_preset", "YOUR_UPLOAD_PRESET");
+
+        const cloudinaryRes = await axios.post(
+          `${CLOUDINARY_API_URL}image/upload`,
+          form
+        );
+
+        if (cloudinaryRes.status !== 200) {
+          throw new Error("Cloudinary upload failed");
+        }
+
+        imageUpdate = {
+          imageUrl: cloudinaryRes.data.secure_url,
+          imagePublicId: cloudinaryRes.data.public_id,
+        };
+      }
+
+      const response = await axios.patch(`${API_URL}/${id}`, {
+        ...updatedData,
+        ...imageUpdate, // Add image data if available
+      });
+
       return response.data;
     } catch (error) {
       return thunkAPI.rejectWithValue("Failed to update product");
@@ -62,8 +117,22 @@ export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
   async (id, thunkAPI) => {
     try {
+      // Fetch the product before deletion to get the imagePublicId
+      const productResponse = await axios.get(`${API_URL}/${id}`);
+      const product = productResponse.data;
+
+      // Delete the product from the backend
       await axios.delete(`${API_URL}/${id}`);
-      return id;
+
+      // Now delete the image from Cloudinary
+      if (product.imagePublicId) {
+        await axios.post(`${CLOUDINARY_API_URL}image/destroy`, {
+          public_id: product.imagePublicId,
+          invalidate: true,
+        });
+      }
+
+      return id; // Return the product id to delete it from the state
     } catch (error) {
       return thunkAPI.rejectWithValue("Failed to delete product");
     }

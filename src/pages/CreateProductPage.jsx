@@ -14,11 +14,12 @@ const CreateProductPage = () => {
     description: "",
     category: "",
     stock: "",
-    imageUrl: "", // Will be populated after uploading to Cloudinary
+    imageUrl: "", // No image by default
+    imagePublicId: "", // No imagePublicId by default
   });
 
   const [imageFile, setImageFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(""); // For previewing image
+  const [previewUrl, setPreviewUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -31,19 +32,18 @@ const CreateProductPage = () => {
     const file = e.target.files[0];
     setImageFile(file);
     if (file) {
-      setPreviewUrl(URL.createObjectURL(file)); // Preview image before uploading
+      setPreviewUrl(URL.createObjectURL(file));
     }
   };
 
-  // Function to upload the image to Cloudinary and return the URL
   const uploadImageToCloudinary = async () => {
-    if (!imageFile) return ""; // If no image is selected, return empty
+    if (!imageFile) return {};
 
     setUploading(true);
     const form = new FormData();
     form.append("file", imageFile);
     form.append("upload_preset", UPLOAD_PRESET);
-    form.append("folder", "adrienn"); // Optional: Folder in Cloudinary
+    form.append("folder", "adrienn");
 
     const cloudinaryUploadUrl = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
 
@@ -57,8 +57,13 @@ const CreateProductPage = () => {
 
     if (!res.ok) throw new Error("Image upload failed");
 
-    // Return the URL of the uploaded image (optimized size)
-    return data.secure_url.replace("/upload/", "/upload/w_800,c_fit,f_auto/"); // Optimized image URL
+    return {
+      imageUrl: data.secure_url.replace(
+        "/upload/",
+        "/upload/w_800,c_fit,f_auto/"
+      ),
+      imagePublicId: data.public_id,
+    };
   };
 
   const handleSubmit = async (e) => {
@@ -67,22 +72,22 @@ const CreateProductPage = () => {
     setError("");
 
     try {
-      let finalImageUrl = "";
+      let imageData = {};
 
-      // If an image is selected, upload it to Cloudinary and get the image URL
+      // Upload image to Cloudinary if an image file is selected
       if (imageFile) {
-        finalImageUrl = await uploadImageToCloudinary();
+        imageData = await uploadImageToCloudinary();
       }
 
-      // Create product data object with the image URL (either uploaded or fallback)
       const productData = {
         ...formData,
         price: Number(formData.price),
         stock: Number(formData.stock),
-        imageUrl: finalImageUrl || "https://via.placeholder.com/150", // Fallback image if no file uploaded
+        // Only set imageUrl and imagePublicId if image data exists
+        imageUrl: imageData.imageUrl || "https://via.placeholder.com/150",
+        imagePublicId: imageData.imagePublicId || "",
       };
 
-      // Send the product data to the backend (MongoDB)
       const response = await fetch(
         "https://adrienn-backend.onrender.com/api/products/",
         {
@@ -96,11 +101,11 @@ const CreateProductPage = () => {
 
       const newProduct = await response.json();
       console.log("Product Created:", newProduct);
-      navigate("/admin"); // Redirect after success
+      navigate("/admin");
     } catch (err) {
-      setError(err.message); // Handle errors (e.g., network issues, etc.)
+      setError(err.message);
     } finally {
-      setLoading(false); // Turn off loading spinner
+      setLoading(false);
     }
   };
 
@@ -110,7 +115,6 @@ const CreateProductPage = () => {
       {error && <p className="text-red-500 mb-2">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Basic Fields */}
         {["name", "price", "category", "stock"].map((field) => (
           <input
             key={field}
@@ -124,7 +128,6 @@ const CreateProductPage = () => {
           />
         ))}
 
-        {/* Description */}
         <textarea
           name="description"
           value={formData.description}
@@ -134,7 +137,6 @@ const CreateProductPage = () => {
           className="border rounded w-full p-2 text-gray-500"
         />
 
-        {/* Image Upload */}
         <input
           type="file"
           accept="image/*"
