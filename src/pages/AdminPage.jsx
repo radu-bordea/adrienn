@@ -26,21 +26,20 @@ const AdminPage = () => {
     dispatch(fetchProducts());
   }, [dispatch, user, isLoaded, navigate]);
 
-const handleDelete = async (id) => {
-  const confirm = window.confirm(
-    "Are you sure you want to delete this product?"
-  );
-  if (!confirm) return;
+  const handleDelete = async (id) => {
+    const confirm = window.confirm(
+      "Are you sure you want to delete this product?"
+    );
+    if (!confirm) return;
 
-  try {
-    // Dispatch action to delete the product via API call
-    await dispatch(deleteProduct(id)); // Assuming deleteProduct is a Redux action that performs an API call
-  } catch (error) {
-    console.error("Failed to delete product:", error);
-  }
-};
-
-
+    try {
+      // Dispatch action to delete the product via API call
+      await dispatch(deleteProduct(id)); // Assuming deleteProduct is a Redux action that performs an API call
+      alert("Product deleted successfully!");
+    } catch (error) {
+      console.error("Failed to delete product:", error);
+    }
+  };
 
   const handleCreate = () => navigate("/admin/create-product");
 

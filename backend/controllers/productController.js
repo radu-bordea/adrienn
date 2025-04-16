@@ -2,12 +2,6 @@ const Product = require("../models/productModel");
 const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 
-// Ensure Cloudinary is configured
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 
 // Get all products
 const getProducts = async (req, res) => {
@@ -59,7 +53,7 @@ const createProduct = async (req, res) => {
   }
 };
 
-// Delete a product (without interacting with Cloudinary)
+// Delete a product
 const deleteProduct = async (req, res) => {
   const { id } = req.params;
 
@@ -73,22 +67,16 @@ const deleteProduct = async (req, res) => {
       return res.status(404).json({ error: "Product not found." });
     }
 
-    // Proceed to delete the product
+    // Proceed to delete the product from MongoDB
     await Product.findByIdAndDelete(id);
 
-    // Send response indicating the product was deleted successfully
-    res.status(200).json({ message: "Product deleted successfully." });
+    // Send response with the product ID to remove it from the frontend state
+    res.status(200).json({ message: "Product deleted successfully.", id });
   } catch (err) {
     console.error("Error during product deletion:", err);
     res.status(500).json({ error: "Failed to delete product." });
   }
 };
-
-module.exports = {
-  deleteProduct,
-};
-
-
 
 // Update a product (replace Cloudinary image if a new one is provided)
 const updateProduct = async (req, res) => {

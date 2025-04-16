@@ -110,11 +110,11 @@ export const updateProduct = createAsyncThunk(
   }
 );
 
-// Delete
+// Delete product
 export const deleteProduct = (id) => async (dispatch) => {
   try {
-    const response = await axios.delete(`/api/products/${id}`);
-    dispatch({ type: "DELETE_PRODUCT", payload: id });
+    const response = await axios.delete(`${API_URL}/${id}`);
+    dispatch({ type: "DELETE_PRODUCT", payload: id }); // Send ID to remove from the state
   } catch (error) {
     console.error("Failed to delete product:", error);
     dispatch({ type: "DELETE_PRODUCT_ERROR", payload: error.message });
@@ -197,11 +197,11 @@ const productsSlice = createSlice({
         state.error = null;
       })
       .addCase(deleteProduct.fulfilled, (state, action) => {
-        state.loading = false;
-        state.items = state.items.filter((p) => p._id !== action.payload);
+        state.items = state.items.filter(
+          (product) => product._id !== action.payload
+        );
       })
       .addCase(deleteProduct.rejected, (state, action) => {
-        state.loading = false;
         state.error = action.payload;
       });
   },
