@@ -18,7 +18,9 @@ const ContactPage = () => {
   useEffect(() => {
     const fetchContact = async () => {
       try {
-        const res = await axios.get("/api/contact");
+        const res = await axios.get(
+          "https://adrienn-backend.onrender.com/api/contact"
+        );
         setContact(res.data);
         setFormData(res.data);
         setLoading(false);
@@ -46,7 +48,10 @@ const ContactPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.patch("/api/contact", formData);
+      const res = await axios.patch(
+        "https://adrienn-backend.onrender.com/api/contact",
+        formData
+      );
       setContact(res.data);
       alert("Contact updated successfully!");
     } catch (err) {
