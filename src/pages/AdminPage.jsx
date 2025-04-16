@@ -103,7 +103,7 @@ const AdminPage = () => {
               </div>
 
               {/* Description */}
-              <div className="flex-1 text-sm text-gray-600 text-left">
+              <div className="flex-1 text-sm text-gray-500 text-left">
                 <span className="md:hidden block">
                   {limitDescription(product.description)}
                 </span>

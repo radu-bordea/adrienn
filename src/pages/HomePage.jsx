@@ -21,7 +21,7 @@ const HomePage = () => {
 
   return (
     <div className="text-center mt-10">
-      <h1 className="text-2xl font-bold">Products</h1>
+      <h1 className="text-2xl font-bold text-gray-500">Products</h1>
 
       {/* Show loading and error states */}
       {loading && <p>Loading products...</p>}

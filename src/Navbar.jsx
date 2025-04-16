@@ -15,13 +15,13 @@ const Navbar = () => {
   return (
     <nav className="shadow-md p-4">
       <div className="container flex justify-between items-center">
-        <NavLink to="/" className="mx-12 text-xl font-bold text-gray-600">
+        <NavLink to="/" className="mx-12 text-xl font-bold text-gray-500">
           Shop with Adrienn
         </NavLink>
 
         {/* Burger Button */}
         <button
-          className="md:hidden text-gray-800"
+          className="md:hidden text-gray-500"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? "✖" : "☰"}
@@ -37,7 +37,7 @@ const Navbar = () => {
         >
           <NavLink
             to="/"
-            className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
+            className="block text-gray-400 hover:text-blue-500 px-3 py-2 text-center"
             onClick={() => setIsOpen(false)}
           >
             Home
@@ -46,7 +46,7 @@ const Navbar = () => {
 
           <NavLink
             to="/about"
-            className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
+            className="block text-gray-400 hover:text-blue-500 px-3 py-2 text-center"
             onClick={() => setIsOpen(false)}
           >
             About
@@ -54,7 +54,7 @@ const Navbar = () => {
 
           <NavLink
             to="/contact"
-            className="block text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
+            className="block text-gray-400 hover:text-blue-500 px-3 py-2 text-center"
             onClick={() => setIsOpen(false)}
           >
             Contact
@@ -63,7 +63,7 @@ const Navbar = () => {
           <SignedIn>
             <NavLink
               to="/admin"
-              className="block  text-gray-500 hover:text-blue-500 px-3 py-2 text-center"
+              className="block  text-gray-400 hover:text-blue-500 px-3 py-2 text-center"
               onClick={() => setIsOpen(false)}
             >
               Admin

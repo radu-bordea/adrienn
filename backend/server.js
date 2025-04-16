@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
 const productRoutes = require("./routes/products");
-const cloudinary = require("cloudinary").v2;
+const contactRoutes = require("./routes/contactRoutes");
 
 // express app
 const app = express();
@@ -25,6 +25,7 @@ app.use((req, res, next) => {
 
 // routes
 app.use("/api/products", productRoutes);
+app.use("/api/contact", contactRoutes);
 
 // connect to db
 mongoose
