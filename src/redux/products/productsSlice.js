@@ -111,23 +111,15 @@ export const updateProduct = createAsyncThunk(
 );
 
 // Delete
-export const deleteProduct = createAsyncThunk(
-  "products/deleteProduct",
-  async (id, { rejectWithValue }) => {
-    try {
-      const response = await axios.delete(`${API_URL}/${id}`);
-      return id; // Return the product ID to remove it from the Redux state
-    } catch (err) {
-      // If Cloudinary fails, we'll get a more specific message from backend
-      console.error("Failed to delete product:", err.response?.data || err);
-      return rejectWithValue(
-        err.response?.data?.error || "Failed to delete product."
-      );
-    }
+export const deleteProduct = (id) => async (dispatch) => {
+  try {
+    const response = await axios.delete(`/api/products/${id}`);
+    dispatch({ type: "DELETE_PRODUCT", payload: id });
+  } catch (error) {
+    console.error("Failed to delete product:", error);
+    dispatch({ type: "DELETE_PRODUCT_ERROR", payload: error.message });
   }
-);
-
-
+};
 
 
 const productsSlice = createSlice({

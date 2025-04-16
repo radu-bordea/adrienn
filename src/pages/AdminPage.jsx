@@ -33,13 +33,13 @@ const handleDelete = async (id) => {
   if (!confirm) return;
 
   try {
-    await dispatch(deleteProduct(id)); // Trigger Redux deleteProduct action
-    alert("Product deleted successfully");
-  } catch (err) {
-    console.error("Failed to delete product:", err.message || err);
-    alert(`Failed to delete product: ${err.message || err}`);
+    // Dispatch action to delete the product via API call
+    await dispatch(deleteProduct(id)); // Assuming deleteProduct is a Redux action that performs an API call
+  } catch (error) {
+    console.error("Failed to delete product:", error);
   }
 };
+
 
 
   const handleCreate = () => navigate("/admin/create-product");
