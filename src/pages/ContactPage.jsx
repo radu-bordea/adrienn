@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { SignedIn } from "@clerk/clerk-react"; // 👈 import Clerk SignedIn
 
 const ContactPage = () => {
   const [contact, setContact] = useState(null);
-  const [showContactInfo, setShowContactInfo] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -13,8 +13,8 @@ const ContactPage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showEditForm, setShowEditForm] = useState(false);
 
-  // Fetch contact on mount
   useEffect(() => {
     const fetchContact = async () => {
       try {
@@ -33,10 +33,6 @@ const ContactPage = () => {
     fetchContact();
   }, []);
 
-  const toggleContactInfo = () => {
-    setShowContactInfo(!showContactInfo);
-  };
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -54,6 +50,7 @@ const ContactPage = () => {
       );
       setContact(res.data);
       alert("Contact updated successfully!");
+      setShowEditForm(false);
     } catch (err) {
       console.error(err);
       alert("Failed to update contact.");
@@ -65,19 +62,11 @@ const ContactPage = () => {
 
   return (
     <div className="container mx-auto p-6 mt-10">
-      <h1 className="text-3xl font-bold mb-4">Contact Us</h1>
+      <h1 className="text-3xl font-bold mb-6">Contact Us</h1>
 
-      {/* Toggle Button */}
-      <button
-        onClick={toggleContactInfo}
-        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-      >
-        {showContactInfo ? "Hide Contact Info" : "Show Contact Info"}
-      </button>
-
-      {/* Display Contact Info */}
-      {showContactInfo && contact && (
-        <div className="mt-4 text-gray-700 space-y-1">
+      {/* Contact Info */}
+      {contact && (
+        <div className="mb-6 text-gray-500 space-y-1">
           <p className="text-lg font-semibold">Name: {contact.name}</p>
           <p className="text-lg font-semibold">Address: {contact.address}</p>
           <p className="text-lg font-semibold">Email: {contact.email}</p>
@@ -87,7 +76,7 @@ const ContactPage = () => {
               href={`https://${contact.facebook}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600"
+              className="text-blue-400"
             >
               {contact.facebook}
             </a>
@@ -98,7 +87,7 @@ const ContactPage = () => {
               href={`https://${contact.instagram}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-purple-600"
+              className="text-purple-400"
             >
               {contact.instagram}
             </a>
@@ -106,35 +95,46 @@ const ContactPage = () => {
         </div>
       )}
 
-      {/* Edit Form */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-semibold mb-4">Edit Contact Info</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {["name", "address", "email", "facebook", "instagram"].map(
-            (field) => (
-              <div key={field}>
-                <label className="block text-sm font-medium capitalize text-gray-700">
-                  {field}
-                </label>
-                <input
-                  type="text"
-                  name={field}
-                  value={formData[field]}
-                  onChange={handleChange}
-                  className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-              </div>
-            )
-          )}
+      {/* Only show this section if user is signed in */}
+      <SignedIn>
+        <button
+          onClick={() => setShowEditForm((prev) => !prev)}
+          className="mb-6 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          {showEditForm ? "Hide Edit Form" : "Edit Contact Info"}
+        </button>
 
-          <button
-            type="submit"
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
-          >
-            Update Contact
-          </button>
-        </form>
-      </div>
+        {showEditForm && (
+          <div>
+            <h2 className="text-2xl font-semibold mb-4">Edit Contact Info</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {["name", "address", "email", "facebook", "instagram"].map(
+                (field) => (
+                  <div key={field}>
+                    <label className="block text-sm font-medium capitalize text-gray-700">
+                      {field}
+                    </label>
+                    <input
+                      type="text"
+                      name={field}
+                      value={formData[field]}
+                      onChange={handleChange}
+                      className="w-full mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                  </div>
+                )
+              )}
+
+              <button
+                type="submit"
+                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+              >
+                Update Contact
+              </button>
+            </form>
+          </div>
+        )}
+      </SignedIn>
     </div>
   );
 };
