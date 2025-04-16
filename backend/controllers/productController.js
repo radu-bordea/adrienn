@@ -73,12 +73,23 @@ const deleteProduct = async (req, res) => {
       return res.status(404).json({ error: "Product not found." });
     }
 
-    // Try deleting from Cloudinary but do not block product deletion if it fails
+    // Check if there's an image to delete
     if (product.imagePublicId) {
       try {
+        console.log(
+          `Attempting to delete image from Cloudinary: ${product.imagePublicId}`
+        );
+
+        // Try deleting the image from Cloudinary
         const result = await cloudinary.uploader.destroy(product.imagePublicId);
-        if (result.result !== "ok" && result.result !== "not found") {
-          console.warn("Cloudinary deletion result:", result);
+
+        // Log the result of the deletion attempt
+        if (result.result === "ok") {
+          console.log("Cloudinary image deleted successfully.");
+        } else if (result.result === "not found") {
+          console.log("Image already deleted or not found on Cloudinary.");
+        } else {
+          console.warn("Cloudinary deletion failed:", result);
         }
       } catch (cloudErr) {
         console.error("Cloudinary error (non-blocking):", cloudErr);
@@ -86,9 +97,10 @@ const deleteProduct = async (req, res) => {
       }
     }
 
-    // Delete the product
+    // Proceed to delete the product
     await Product.findByIdAndDelete(id);
 
+    // Send response indicating the product was deleted successfully
     res.status(200).json({ message: "Product deleted successfully." });
   } catch (err) {
     console.error("Error during product deletion:", err);
