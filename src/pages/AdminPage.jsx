@@ -27,17 +27,22 @@ const AdminPage = () => {
   }, [dispatch, user, isLoaded, navigate]);
 
   const handleDelete = async (id) => {
-    const confirm = window.confirm(
+    const confirmDelete = window.confirm(
       "Are you sure you want to delete this product?"
     );
-    if (!confirm) return;
+    if (!confirmDelete) return;
 
     try {
-      // Dispatch action to delete the product via API call
-      await dispatch(deleteProduct(id)); // Assuming deleteProduct is a Redux action that performs an API call
-      alert("Product deleted successfully!");
+      const resultAction = await dispatch(deleteProduct(id));
+
+      if (deleteProduct.fulfilled.match(resultAction)) {
+        alert("Product deleted successfully!");
+      } else {
+        throw new Error(resultAction.payload || "Delete failed");
+      }
     } catch (error) {
-      console.error("Failed to delete product:", error);
+      console.error("Failed to delete product:", error.message);
+      alert("An error occurred while deleting the product.");
     }
   };
 
