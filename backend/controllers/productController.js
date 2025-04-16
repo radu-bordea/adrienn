@@ -69,31 +69,34 @@ const deleteProduct = async (req, res) => {
 
   try {
     const product = await Product.findById(id);
-    if (!product) return res.status(404).json({ error: "Product not found." });
+    if (!product) {
+      return res.status(404).json({ error: "Product not found." });
+    }
 
-    // Delete image from Cloudinary if it exists
+    // Try deleting from Cloudinary but do not block product deletion if it fails
     if (product.imagePublicId) {
       try {
         const result = await cloudinary.uploader.destroy(product.imagePublicId);
-        if (result.result !== "ok") {
+        if (result.result !== "ok" && result.result !== "not found") {
           console.warn("Cloudinary deletion result:", result);
         }
-      } catch (err) {
-        console.error("Cloudinary deletion error:", err);
-        return res
-          .status(500)
-          .json({ error: "Failed to delete image from Cloudinary." });
+      } catch (cloudErr) {
+        console.error("Cloudinary error (non-blocking):", cloudErr);
+        // Continue even if Cloudinary fails
       }
     }
 
+    // Delete the product
     await Product.findByIdAndDelete(id);
-    res
-      .status(200)
-      .json({ message: "Product and image deleted successfully." });
+
+    res.status(200).json({ message: "Product deleted successfully." });
   } catch (err) {
+    console.error("Error during product deletion:", err);
     res.status(500).json({ error: "Failed to delete product." });
   }
 };
+
+
 
 // Update a product (replace Cloudinary image if a new one is provided)
 const updateProduct = async (req, res) => {
