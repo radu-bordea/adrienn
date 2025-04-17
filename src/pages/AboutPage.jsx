@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useUser } from "@clerk/clerk-react";
 
 const API = "https://adrienn-backend.onrender.com/api/about";
 
@@ -8,6 +9,7 @@ const AboutPage = () => {
   const [newParagraph, setNewParagraph] = useState("");
   const [editId, setEditId] = useState(null);
   const [editText, setEditText] = useState("");
+  const { isSignedIn } = useUser();
 
   useEffect(() => {
     fetchParagraphs();
@@ -34,6 +36,11 @@ const AboutPage = () => {
   };
 
   const handleDelete = async (id) => {
+    const confirm = window.confirm(
+      "Are you sure you want to delete this paragraph?"
+    );
+    if (!confirm) return;
+
     try {
       await axios.delete(`${API}/${id}`);
       setParagraphs(paragraphs.filter((p) => p._id !== id));
@@ -57,22 +64,24 @@ const AboutPage = () => {
     <div className="container mx-auto p-6 mt-10 text-gray-700">
       <h1 className="text-3xl font-bold mb-6">About Me</h1>
 
-      {/* Add New */}
-      <div className="mb-6">
-        <textarea
-          value={newParagraph}
-          onChange={(e) => setNewParagraph(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded mb-2"
-          rows={3}
-          placeholder="Write new about paragraph..."
-        />
-        <button
-          onClick={handleAdd}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Add Paragraph
-        </button>
-      </div>
+      {/* Add New - Only show if signed in */}
+      {isSignedIn && (
+        <div className="mb-6">
+          <textarea
+            value={newParagraph}
+            onChange={(e) => setNewParagraph(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded mb-2"
+            rows={3}
+            placeholder="Write new about paragraph..."
+          />
+          <button
+            onClick={handleAdd}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            Add Paragraph
+          </button>
+        </div>
+      )}
 
       {/* List All */}
       {paragraphs.map((p) => (
@@ -106,23 +115,25 @@ const AboutPage = () => {
           ) : (
             <div>
               <p className="text-lg mb-2">{p.paragraph}</p>
-              <div className="space-x-2">
-                <button
-                  onClick={() => {
-                    setEditId(p._id);
-                    setEditText(p.paragraph);
-                  }}
-                  className="px-3 py-1 bg-blue-400 text-white rounded"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(p._id)}
-                  className="px-3 py-1 bg-red-500 text-white rounded"
-                >
-                  Delete
-                </button>
-              </div>
+              {isSignedIn && (
+                <div className="space-x-2">
+                  <button
+                    onClick={() => {
+                      setEditId(p._id);
+                      setEditText(p.paragraph);
+                    }}
+                    className="px-3 py-1 bg-blue-400 text-white rounded"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p._id)}
+                    className="px-3 py-1 bg-red-500 text-white rounded"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
