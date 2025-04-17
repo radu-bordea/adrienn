@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 
-// const API = "https://adrienn-backend.onrender.com/api/about";
+const API = "https://adrienn-backend.onrender.com/api/about";
 
 const AboutPage = () => {
   const [paragraphs, setParagraphs] = useState([]);
